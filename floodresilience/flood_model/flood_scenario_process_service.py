@@ -119,8 +119,6 @@ def building_flood_status_catalog(scenario_id: int) -> dict:
     gs_building_workspace = f"{EnvVar.POSTGRES_DB}-buildings"
     gs_building_url = f"{EnvVar.GEOSERVER_HOST}:{EnvVar.GEOSERVER_PORT}/geoserver/{gs_building_workspace}/ows"
 
-    flooded_color = "darkred"
-    non_flooded_color = "darkgreen"
     return {
         "type": "wfs",
         "name": dataset_name,
@@ -130,43 +128,24 @@ def building_flood_status_catalog(scenario_id: int) -> dict:
             "viewparams": f"scenario:{scenario_id}",
         },
         "maxFeatures": 300000,
-        "styles": [{
-            "id": "is_flooded",
-            "title": dataset_name,
-            "color": {
-                "mapType": "enum",
-                "colorColumn": "is_flooded_int",
-                "legend": {
-                    "title": dataset_name,
-                    "items": [
-                        {
-                            "title": "Non-Flooded",
-                            "color": non_flooded_color
-                        },
-                        {
-                            "title": "Flooded",
-                            "color": flooded_color
-                        }
-                    ]
+        "heightProperty": "extruded_height",
+        "featureInfoTemplate": {
+            "name": "Building Flood Status - {{flood_model_id}} - {{building_outline_id}}",
+            "template": "<table class=\"cesium-infoBox-defaultTable\"><tbody><tr><td style=\"vertical-align: middle;\"><b>Building Outline Id</b></td><td>{{building_outline_id}}</td></tr><tr><td style=\"vertical-align: middle;\"><b>Building Id</b></td><td>{{building_id}}</td></tr><tr><td style=\"vertical-align: middle;\"><b>Name</b></td><td>{{name}}</td></tr><tr><td style=\"vertical-align: middle;\"><b>Use</b></td><td>{{use}}</td></tr><tr><td style=\"vertical-align: middle;\"><b>Suburb Locality</b></td><td>{{suburb_locality}}</td></tr><tr><td style=\"vertical-align: middle;\"><b>Town City</b></td><td>{{town_city}}</td></tr><tr><td style=\"vertical-align: middle;\"><b>Territorial Authority</b></td><td>{{territorial_authority}}</td></tr><tr><td style=\"vertical-align: middle;\"><b>Capture Method</b></td><td>{{capture_method}}</td></tr><tr><td style=\"vertical-align: middle;\"><b>Capture Source Group</b></td><td>{{capture_source_group}}</td></tr><tr><td style=\"vertical-align: middle;\"><b>Capture Source Id</b></td><td>{{capture_source_id}}</td></tr><tr><td style=\"vertical-align: middle;\"><b>Capture Source Name</b></td><td>{{capture_source_name}}</td></tr><tr><td style=\"vertical-align: middle;\"><b>Capture Source From</b></td><td>{{capture_source_from}}</td></tr><tr><td style=\"vertical-align: middle;\"><b>Capture Source To</b></td><td>{{capture_source_to}}</td></tr><tr><td style=\"vertical-align: middle;\"><b>Building Outline Lifecycle</b></td><td>{{building_outline_lifecycle}}</td></tr><tr><td style=\"vertical-align: middle;\"><b>Begin Lifespan</b></td><td>{{begin_lifespan}}</td></tr><tr><td style=\"vertical-align: middle;\"><b>End Lifespan</b></td><td>{{end_lifespan}}</td></tr><tr><td style=\"vertical-align: middle;\"><b>Last Modified</b></td><td>{{last_modified}}</td></tr><tr><td style=\"vertical-align: middle;\"><b>Is Flooded</b></td><td>{{is_flooded}}</td></tr><tr><td style=\"vertical-align: middle;\"><b>Flood Model Id</b></td><td>{{flood_model_id}}</td></tr></tbody></table>"
+        },
+        "legends": [{
+            "title": "Building Flood Status",
+            "items": [
+                {
+                    "title": "Non-Flooded",
+                    "color": "darkgreen"
                 },
-                "enumColors": [
-                    {
-                        "value": "0",
-                        "color": non_flooded_color
-                    },
-                    {
-                        "value": "1",
-                        "color": flooded_color
-                    }
-                ]
-            },
-            "outline": {
-                "null": {
-                    "width": 0
+                {
+                    "title": "Flooded",
+                    "color": "darkred"
                 }
-            }
-        }],
-        "activeStyle": "is_flooded"
+            ]
+        }]
     }
 
 
