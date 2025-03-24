@@ -119,6 +119,15 @@ def create_layer_from_store(geoserver_url: str, layer_name: str, workspace_name:
             <string>TIFF</string>
             <string>PNG</string>
         </supportedFormats>
+        <dimensions>
+        <coverageDimension>
+          <name>Water Depth (m)</name>
+          <unit>m</unit>
+          <dimensionType>
+            <name>REAL_32BITS</name>
+          </dimensionType>
+        </coverageDimension>
+        </dimensions>
         <requestSRS><string>EPSG:2193</string></requestSRS>
         <responseSRS><string>EPSG:2193</string></responseSRS>
         <srs>EPSG:2193</srs>
