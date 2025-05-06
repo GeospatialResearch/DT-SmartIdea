@@ -178,6 +178,7 @@ def flood_depth_catalog(scenario_id: int) -> dict:
         "layers": f"{gs_flood_model_workspace}:output_{scenario_id}",
         "styles": "viridis_raster",
         "featureInfoTemplate": {
-            "template": flood_depth_infobox_template
+            "name": f"Flood depth - {scenario_id}",
+            "template": flood_depth_infobox_template.format(flood_scenario_id=scenario_id)
         }
     }
