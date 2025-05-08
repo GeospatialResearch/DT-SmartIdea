@@ -18,6 +18,9 @@
 FROM docker.osgeo.org/geoserver:2.27.0 AS geoserver
 
 # Dockerfile for the geoserver instance of the digital twin, serves geospatial data from files and db.
+ENV INSTALL_EXTENSIONS="true"
+ENV STABLE_EXTENSIONS="netcdf"
+RUN /opt/install-extensions.sh
 
 # Allows nonroot users in other containers to write to shared GEOSERVER_DATA_DIR volume
 RUN <<EOF
