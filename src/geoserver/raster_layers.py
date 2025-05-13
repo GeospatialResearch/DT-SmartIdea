@@ -29,6 +29,7 @@ from src.geoserver.geoserver_common import get_geoserver_url, send_create_layer_
 log = logging.getLogger(__name__)
 _xml_header = {"Content-type": "text/xml"}
 
+
 def create_layer_from_gtiff_store(geoserver_url: str, layer_name: str, workspace_name: str) -> None:
     """
     Create a GeoServer Layer from a GeoServer store, making it ready to serve.

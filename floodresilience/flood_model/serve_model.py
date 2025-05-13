@@ -25,7 +25,6 @@ import os
 import pathlib
 from xml.sax import saxutils
 
-import rasterio as rio
 import xarray as xr
 
 from src import geoserver

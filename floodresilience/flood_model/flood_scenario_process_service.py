@@ -18,12 +18,12 @@
 """Defines PyWPS WebProcessingService process for creating a flooding scenario."""
 
 import json
-import requests
 from urllib.parse import urlencode
 import xml.etree.ElementTree as et
 
 from pywps import BoundingBoxInput, ComplexOutput, Format, LiteralInput, Process, WPSRequest
 from pywps.response.execute import ExecuteResponse
+import requests
 from shapely import box
 
 from floodresilience import tasks
@@ -218,7 +218,7 @@ def flood_depth_catalog(scenario_id: int) -> dict:
 
 def query_time_dimension(gs_workspace_wms_url: str, layer_name: str) -> str:
     """
-    Queries Geoserver to find the time slices available for a given layer.
+    Query Geoserver to find the time slices available for a given layer.
 
     Parameters
     ----------
