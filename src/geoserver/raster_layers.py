@@ -3,70 +3,14 @@
 
 import logging
 import pathlib
-import shutil
 
 import requests
 
 from src.config import EnvVariable
-from src.geoserver.geoserver_common import get_geoserver_url, style_exists
+from src.geoserver.geoserver_common import get_geoserver_url, upload_file_to_store, style_exists
 
 log = logging.getLogger(__name__)
 _xml_header = {"Content-type": "text/xml"}
-
-
-def upload_gtiff_to_store(
-    geoserver_url: str,
-    gtiff_filepath: pathlib.Path,
-    store_name: str,
-    workspace_name: str
-) -> None:
-    """
-    Upload a GeoTiff file to a new GeoServer store, to enable serving.
-
-    Parameters
-    ----------
-    geoserver_url : str
-        The URL to the geoserver instance.
-    gtiff_filepath : pathlib.Path
-        The filepath to the GeoTiff file to be served.
-    store_name : str
-        The name of the new Geoserver store to be created.
-    workspace_name : str
-        The name of the existing GeoServer workspace that the store is to be added to.
-
-    Raises
-    ----------
-    HTTPError
-        If geoserver responds with an error, raises it as an exception since it is unexpected.
-    """
-    log.info(f"Uploading {gtiff_filepath.name} to Geoserver workspace {workspace_name}")
-
-    # Set file copying src and dest
-    geoserver_data_root = EnvVariable.DATA_DIR_GEOSERVER
-    geoserver_data_dest = pathlib.Path("data") / workspace_name / gtiff_filepath.name
-    # Copy file to geoserver data folder
-    shutil.copyfile(gtiff_filepath, geoserver_data_root / geoserver_data_dest)
-    # Send request to add data
-    data = f"""
-    <coverageStore>
-        <name>{store_name}</name>
-        <workspace>{workspace_name}</workspace>
-        <enabled>true</enabled>
-        <type>GeoTIFF</type>
-        <url>file:{geoserver_data_dest.as_posix()}</url>
-    </coverageStore>
-    """
-    response = requests.post(
-        f'{geoserver_url}/workspaces/{workspace_name}/coveragestores',
-        params={"configure": "all"},
-        headers=_xml_header,
-        data=data,
-        auth=(EnvVariable.GEOSERVER_ADMIN_NAME, EnvVariable.GEOSERVER_ADMIN_PASSWORD),
-    )
-    if not response.ok:
-        # Raise error manually so we can configure the text
-        raise requests.HTTPError(response.text, response=response)
-    log.info(f"Uploaded {gtiff_filepath.name} to Geoserver workspace {workspace_name}.")
 
 
 def create_layer_from_store(geoserver_url: str, layer_name: str, workspace_name: str) -> None:
@@ -162,7 +106,7 @@ def add_gtiff_to_geoserver(gtiff_filepath: pathlib.Path, workspace_name: str, mo
     gs_url = get_geoserver_url()
     layer_name = f"output_{model_id}"
     # Upload the raster into geoserver
-    upload_gtiff_to_store(gs_url, gtiff_filepath, layer_name, workspace_name)
+    upload_file_to_store(gs_url, gtiff_filepath, layer_name, workspace_name)
     # We can remove the temporary raster
     gtiff_filepath.unlink()
     # Create a GIS layer from the raster file to be served from geoserver
