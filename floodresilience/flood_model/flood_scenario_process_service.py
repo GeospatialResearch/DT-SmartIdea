@@ -198,9 +198,13 @@ def flood_depth_catalog(scenario_id: int) -> dict:
         "url": gs_flood_url,
         "layers": layer_name,
         "styles": style_name,
+        "supportsGetTimeseries": True,
+        "getFeatureInfoParameters": {
+            "request": "GetTimeSeries",
+            "time": "2000-01-01T00:00:00.000Z,2000-01-01T00:00:01.000Z,2000-01-01T00:00:02.000Z"
+        },
         "featureInfoTemplate": {
             "name": f"Flood depth - {scenario_id}",
-            "template": flood_depth_infobox_template.format(flood_scenario_id=scenario_id)
         },
         "legends": [{
             "title": "Flood Depth",
