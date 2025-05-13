@@ -3,10 +3,7 @@
 
 import pathlib
 
-import requests
-
-from src.config import EnvVariable
-from src.geoserver.geoserver_common import get_geoserver_url, upload_file_to_store
+from src.geoserver.geoserver_common import get_geoserver_url, upload_file_to_store, send_create_layer_request
 
 _xml_header = {"Content-type": "text/xml"}
 
@@ -31,71 +28,13 @@ def create_layer_from_nc_store(geoserver_url: str, layer_name: str, workspace_na
     HTTPError
         If geoserver responds with an error, raises it as an exception since it is unexpected.
     """
-    data = f"""
-        <coverage>
-          <name>{layer_name}</name>
-          <title>{layer_name}</title>
-          <nativeName>{band_name}</nativeName>
-          <nativeCoverageName>{band_name}</nativeCoverageName>
-          <srs>EPSG:4326</srs>
-          <nativeCRS>GEOGCS[&quot;WGS 84&quot;,
-          DATUM[&quot;World Geodetic System 1984&quot;,
-            SPHEROID[&quot;WGS 84&quot;, 6378137.0, 298.257223563, AUTHORITY[&quot;EPSG&quot;,&quot;7030&quot;]],
-            AUTHORITY[&quot;EPSG&quot;,&quot;6326&quot;]],
-          PRIMEM[&quot;Greenwich&quot;, 0.0, AUTHORITY[&quot;EPSG&quot;,&quot;8901&quot;]],
-          UNIT[&quot;degree&quot;, 0.017453292519943295],
-          AXIS[&quot;Geodetic longitude&quot;, EAST],
-          AXIS[&quot;Geodetic latitude&quot;, NORTH],
-          AUTHORITY[&quot;EPSG&quot;,&quot;4326&quot;]]</nativeCRS>
-          <enabled>true</enabled>
-          <metadata>
-            <entry key="time">
-              <dimensionInfo>
-                <enabled>true</enabled>
-                <presentation>LIST</presentation>
-                <units>ISO8601</units>
-                <defaultValue>
-                  <strategy>MINIMUM</strategy>
-                </defaultValue>
-              </dimensionInfo>
-            </entry>
-            <entry key="cachingEnabled">true</entry>
-            <entry key="dirName">{layer_name}</entry>
-          </metadata>
-          <nativeFormat>NetCDF</nativeFormat>
-          <supportedFormats>
-            <string>PNG</string>
-            <string>JPEG</string>
-            <string>TIFF</string>
-            <string>GEOTIFF</string>
-          </supportedFormats>
-          <dimensions>
-            <coverageDimension>
-              <name>Water Depth (m)</name>
-              <unit>m</unit>
-              <dimensionType>
-                <name>REAL_32BITS</name>
-              </dimensionType>
-            </coverageDimension>
-          </dimensions>
-          <requestSRS>
-            <string>EPSG:4326</string>
-          </requestSRS>
-          <responseSRS>
-            <string>EPSG:4326</string>
-          </responseSRS>
-        </coverage>
-    """
-    response = requests.post(
-        f"{geoserver_url}/workspaces/{workspace_name}/coveragestores/{layer_name}/coverages",
-        params={"configure": "all"},
-        headers=_xml_header,
-        data=data,
-        auth=(EnvVariable.GEOSERVER_ADMIN_NAME, EnvVariable.GEOSERVER_ADMIN_PASSWORD)
-    )
-    if not response.ok:
-        # Raise error manually so we can configure the text
-        raise requests.HTTPError(response.text, response=response)
+    # Read XML payload template
+    with open("src/geoserver/templates/netcdf_coverage_template.xml", encoding="utf-8") as file:
+        netcdf_coverage_template = file.read()
+    # Fill template to get payload
+    netcdf_coverage_payload = netcdf_coverage_template.format(layer_name=layer_name, band_name=band_name)
+    # Send request to create layer
+    send_create_layer_request(geoserver_url, layer_name, workspace_name, netcdf_coverage_payload)
 
 
 def add_nc_to_geoserver(nc_filepath: pathlib.Path, band_name: str, workspace_name: str, model_id: int) -> None:

@@ -135,6 +135,39 @@ def upload_file_to_store(
     log.info(f"Uploaded {file_to_add.name} to Geoserver workspace {workspace_name}.")
 
 
+def send_create_layer_request(geoserver_url: str, layer_name: str, workspace_name: str, coverage_payload: str) -> None:
+    """
+    Create a GeoServer Layer from a GeoServer store, making it ready to serve.
+
+    Parameters
+    ----------
+    geoserver_url : str
+        The URL to the geoserver instance.
+    layer_name : str
+        Defines the name of the layer in GeoServer.
+    workspace_name : str
+        The name of the existing GeoServer workspace that the store is to be added to.
+    coverage_payload : str
+        The coverage XML data to send in the Geoserver request payload.
+
+    Raises
+    ----------
+    HTTPError
+        If geoserver responds with an error, raises it as an exception since it is unexpected.
+    """
+    # Send request to create layer
+    response = requests.post(
+        f"{geoserver_url}/workspaces/{workspace_name}/coveragestores/{layer_name}/coverages",
+        params={"configure": "all"},
+        headers=_xml_header,
+        data=coverage_payload,
+        auth=(EnvVariable.GEOSERVER_ADMIN_NAME, EnvVariable.GEOSERVER_ADMIN_PASSWORD)
+    )
+    if not response.ok:
+        # Raise error manually so we can configure the text
+        raise requests.HTTPError(response.text, response=response)
+
+
 def style_exists(style_name: str) -> bool:
     """
     Check if a GeoServer style definition already exists for a given style_name.
