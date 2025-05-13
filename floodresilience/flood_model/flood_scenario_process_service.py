@@ -170,9 +170,7 @@ def flood_depth_catalog(scenario_id: int) -> dict:
     gs_flood_url = f"{EnvVar.GEOSERVER_HOST}:{EnvVar.GEOSERVER_PORT}/geoserver/{gs_flood_model_workspace}/ows"
     layer_name = f"{gs_flood_model_workspace}:output_{scenario_id}"
     style_name = "viridis_raster"
-    # Open and read HTML/mustache template file for infobox
-    with open("./floodresilience/flood_model/templates/flood_depth_infobox.mustache", encoding="utf-8") as file:
-        flood_depth_infobox_template = file.read()
+
     # Parameters for the Geoserver GetLegendGraphic request
     legend_url_params = {
         "service": "WMS",

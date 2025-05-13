@@ -32,7 +32,7 @@
     </supportedFormats>
     <dimensions>
         <coverageDimension>
-            <name>Water Depth (m)</name>
+            <name>Water Depth</name>
             <unit>m</unit>
             <dimensionType>
                 <name>REAL_32BITS</name>
