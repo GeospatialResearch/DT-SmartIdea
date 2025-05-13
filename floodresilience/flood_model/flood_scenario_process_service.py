@@ -192,6 +192,7 @@ def flood_depth_catalog(scenario_id: int) -> dict:
     }
     legend_url = f"{gs_flood_url}?{urlencode(legend_url_params)}"
 
+    # Retrieve times available time slices for layer
     time_dimension = query_time_dimension(gs_flood_url, layer_name)
 
     return {
@@ -202,8 +203,8 @@ def flood_depth_catalog(scenario_id: int) -> dict:
         "styles": style_name,
         "supportsGetTimeseries": True,
         "getFeatureInfoParameters": {
-            "request": "GetTimeSeries",
-            "time": time_dimension,
+            "request": "GetTimeSeries", # Terria tries to send "GetTimeseries", but Geoserver ncWMS is case-sensitive
+            "time": time_dimension # Must manually fill time dimension because getFeatureInfoParameters overrides it
         },
         "featureInfoTemplate": {
             "name": f"Flood depth - {scenario_id}",
