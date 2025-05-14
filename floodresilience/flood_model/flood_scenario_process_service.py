@@ -202,9 +202,10 @@ def flood_depth_catalog(scenario_id: int) -> dict:
         "layers": layer_name,
         "styles": style_name,
         "supportsGetTimeseries": True,
+        "multiplierDefaultDeltaStep": 6,  # Slow down timeline to give more time for rasters to load.
         "getFeatureInfoParameters": {
-            "request": "GetTimeSeries", # Terria tries to send "GetTimeseries", but Geoserver ncWMS is case-sensitive
-            "time": time_dimension # Must manually fill time dimension because getFeatureInfoParameters overrides it
+            "request": "GetTimeSeries",  # Terria tries to send "GetTimeseries", but Geoserver ncWMS is case-sensitive.
+            "time": time_dimension  # Must manually fill time dimension because getFeatureInfoParameters overrides it.
         },
         "featureInfoTemplate": {
             "name": f"Flood depth - {scenario_id}",
