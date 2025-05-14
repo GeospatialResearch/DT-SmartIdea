@@ -14,5 +14,9 @@
       "identifier": "fredt"
     }
   ],
-  "viewerMode": "3dSmooth"
+  "viewerMode": "3dSmooth",
+  "baseMaps": {
+    "defaultBaseMapId": "basemap-openstreetmap",
+    "previewBaseMapId": "basemap-openstreetmap"
+  }
 }
