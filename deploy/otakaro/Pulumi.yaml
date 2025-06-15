@@ -1,4 +1,4 @@
-name: otakaro
+name: fredt
 description: A minimal AWS Python Pulumi program
 runtime:
   name: python
