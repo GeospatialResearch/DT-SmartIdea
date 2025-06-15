@@ -13,7 +13,7 @@ exports.handler = function(event, context, callback) {
   const authString = 'Basic ' + new Buffer(authUser + ':' + authPass).toString('base64');
 
 
-  if (headers.host[0].value == "gs.otakaro.digitaltwins.nz") {
+  if (headers.host[0].value == "gs.fredt.nzgeospatial.dev") {
     // This unfortunately needs to be wide open.
     callback(null, request);
   }
@@ -21,7 +21,7 @@ exports.handler = function(event, context, callback) {
   // This is a bit of a hack - A browser will specify the origin for a backend request along with the host. 
   // Given the basic auth is a barrier to entry and not an outright security risk,
   if (typeof headers.origin !== 'undefined') {
-    if (headers.host[0].value == "api.otakaro.digitaltwins.nz" && headers.origin[0].value == "https://otakaro.digitaltwins.nz") {
+    if (headers.host[0].value == "api.fredt.nzgeospatial.dev" && headers.origin[0].value == "https://fredt.nzgeospatial.dev") {
       callback(null, request);
     }
   }

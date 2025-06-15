@@ -40,8 +40,8 @@ class CloudFront:
 
     zone_name : str
         Required because retrieving the name from the dns zone is complicated.
-        This should just be the primary domain name (i.e otakaro.digitaltwins.nz as an alias
-        means this should be `digitaltwins.nz`)
+        This should just be the primary domain name (i.e fredt.nzgeospatial.dev as an alias
+        means this should be `nzgeospatial.dev`)
     """
 
     def __init__(
@@ -51,6 +51,7 @@ class CloudFront:
         certificate: aws.acm.Certificate,
         dns_zone: aws.route53.Zone,
         zone_name: str,
+        prefix: str,
         basic_auth: tuple = None,
     ):
         # Cloudfront is us-east-1 only for the API
@@ -58,17 +59,15 @@ class CloudFront:
         if basic_auth:
             basic_auth_func = self._basic_auth(basic_auth)
 
+        internal_alb_id = f"{prefix}-alb-internal"
+
         cloudfront = aws.cloudfront.Distribution(
             "cloudfront_dist",
-            aliases=[
-                "api.otakaro.digitaltwins.nz",
-                "otakaro.digitaltwins.nz",
-                "gs.otakaro.digitaltwins.nz",
-            ],
+            aliases=aliases,
             origins=[
                 aws.cloudfront.DistributionOriginArgs(
                     domain_name=origin_domain_name,
-                    origin_id="otakaro-alb-internal",
+                    origin_id=internal_alb_id,
                     custom_origin_config=aws.cloudfront.DistributionOriginCustomOriginConfigArgs(
                         http_port=80,
                         https_port=443,
@@ -93,7 +92,7 @@ class CloudFront:
                     "PATCH",
                 ],
                 cached_methods=["GET", "HEAD"],
-                target_origin_id="otakaro-alb-internal",
+                target_origin_id=internal_alb_id,
                 viewer_protocol_policy="redirect-to-https",
                 forwarded_values=aws.cloudfront.DistributionDefaultCacheBehaviorForwardedValuesArgs(
                     cookies={"forward": "all"},

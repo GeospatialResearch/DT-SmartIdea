@@ -2,7 +2,7 @@ import pulumi
 import pulumi_aws as aws
 
 
-def create_cert_validation(domain_validation_options, cert_arn, zone_id, provider):
+def create_cert_validation(domain_validation_options, cert_arn, zone_id, provider, primary_domain):
     records = []
     for dvo in domain_validation_options:
         record = aws.route53.Record(
@@ -16,7 +16,7 @@ def create_cert_validation(domain_validation_options, cert_arn, zone_id, provide
         records.append(record)
 
     aws.acm.CertificateValidation(
-        "otakaro.digitaltwins.nz-validation",
+        f"{primary_domain}-validation",
         certificate_arn=cert_arn,
         validation_record_fqdns=[record.fqdn for record in records],
         opts=pulumi.ResourceOptions(provider=provider),
@@ -78,7 +78,7 @@ class AWSCertificate:
         if validate:
             cert.domain_validation_options.apply(
                 lambda domain_validation_options: create_cert_validation(
-                    domain_validation_options, cert.arn, zone.id, provider
+                    domain_validation_options, cert.arn, zone.id, provider, primary_domain
                 )
             )
 

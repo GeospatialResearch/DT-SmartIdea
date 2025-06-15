@@ -30,11 +30,14 @@ availability_zones = 2
 # the values.
 # secret_names = config.get_object("secretParameterNames")
 dns_zone_name = "nzgeospatial.dev"
-app_subdomain = f"fredt.{dns_zone_name}"
+
+app_subdomain = f"{prefix}.{dns_zone_name}"
+backend_domain = f"api.{app_subdomain}"
+geoserver_domain = f"gs.{app_subdomain}"
 domains = [
     app_subdomain,
-    # f"api.{app_subdomain}",
-    # f"gs.{app_subdomain}",
+    # backend_domain,
+    # geoserver_domain,
 ]
 aws_region = "ap-southeast-2"
 
@@ -79,8 +82,8 @@ vpc = awsx.ec2.Vpc(
 # postgres = PostgresInstance(
 #     f"{prefix}-pg",
 #     vpc=vpc,
-#     database_name="otakaro",
-#     username="otakaro",
+#     database_name=prefix,
+#     username=prefix,
 #     password=config.get_secret("databasePassword"),
 #     cidr_blocks=[
 #         network_cidr_block,
@@ -109,7 +112,7 @@ terria = FargateApplication(
     service_port=3001,
     image_tag="2025.06.04",
     # environment=[
-    #     {"name": "BACKEND_HOST", "value": "https://api.otakaro.digitaltwins.nz"}
+    #     {"name": "BACKEND_HOST", "value": f"https://{backend_domain}"}
     # ],
     # secrets=[
     #     {
@@ -167,13 +170,13 @@ terria = FargateApplication(
 #     ("ROAD_DATASET_PATH", "/datasets/roads.gpkg"),
 #     ("FLOOD_MODEL_DIR", "/bg_flood"),
 #     ("POSTGRES_HOST", postgres.address),
-#     ("POSTGRES_USER", "otakaro"),
-#     ("POSTGRES_DB", "otakaro"),
+#     ("POSTGRES_USER", prefix),
+#     ("POSTGRES_DB", prefix),
 #     ("POSTGRES_PORT", "5432"),
 #     ("LIDAR_DIR", "lidar"),
 #     ("DEM_DIR", "hydro_dem"),
 #     ("INSTRUCTIONS_FILE", "./instructions.json"),
-#     ("GEOSERVER_HOST", "https://gs.otakaro.digitaltwins.nz"),
+#     ("GEOSERVER_HOST", f"https://{geoserver_domain}"),
 #     ("GEOSERVER_PORT", "443"),
 #     ("GEOSERVER_ADMIN_NAME", "admin"),
 # ]
@@ -217,10 +220,10 @@ lb = ApplicationLoadBalancer(
     targets=[],
     # targets=[
     #     LoadBalancerTarget(
-    #         "backend", "api.otakaro.digitaltwins.nz", backend.target_group
+    #         "backend", f"{backend_domain}", backend.target_group
     #     ),
     #     LoadBalancerTarget(
-    #         "geoserver", "gs.otakaro.digitaltwins.nz", geoserver.target_group
+    #         "geoserver", f"{geoserver_domain}", geoserver.target_group
     #     ),
     # ],
     certificate=certs["ap-southeast-2"],
@@ -233,6 +236,7 @@ cloudfront = CloudFront(
     certificate=certs["us-east-1"],
     dns_zone=dns_zone,
     zone_name=dns_zone_name,
+    prefix=prefix,
 #     basic_auth=(
 #         config.require_secret("basicAuthUser"),
 #         config.require_secret("basicAuthPassword"),
