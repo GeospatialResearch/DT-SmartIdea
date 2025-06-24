@@ -28,7 +28,7 @@ availability_zones = 2
 # The code below creates secrets with these names, and assigns them to the containers.
 # If you wish to change these values, go into the Parameter Store in the AWS console and change
 # the values.
-# secret_names = config.get_object("secretParameterNames")
+secret_names = config.get_object("secretParameterNames")
 dns_zone_name = "nzgeospatial.dev"
 
 app_subdomain = f"{prefix}.{dns_zone_name}"
@@ -41,16 +41,16 @@ domains = [
 ]
 aws_region = "ap-southeast-2"
 
-# secret_parameters = {
-#     secret: aws.ssm.Parameter(
-#         secret,
-#         name=secret,
-#         type="SecureString",
-#         value="placeholder",
-#         opts=pulumi.ResourceOptions(ignore_changes=["value", "type"]),
-#     )
-#     for secret in secret_names
-# }
+secret_parameters = {
+    secret: aws.ssm.Parameter(
+        secret,
+        name=secret,
+        type="SecureString",
+        value="placeholder",
+        opts=pulumi.ResourceOptions(ignore_changes=["value", "type"]),
+    )
+    for secret in secret_names
+}
 
 
 # Setup DNS Zone
@@ -237,10 +237,10 @@ cloudfront = CloudFront(
     dns_zone=dns_zone,
     zone_name=dns_zone_name,
     prefix=prefix,
-#     basic_auth=(
-#         config.require_secret("basicAuthUser"),
-#         config.require_secret("basicAuthPassword"),
-#     ),
+    basic_auth=(
+        config.require_secret("basicAuthUser"),
+        config.require_secret("basicAuthPassword"),
+    ),
 )
 
 # pulumi.export("backend-ecr-url", backend.repo.repository_url)

@@ -1,0 +1,18 @@
+encryptionsalt: v1:4ft4PNYCpsI=:v1:I6myJlDZn+MWOvU0:vYPD64n+aP3U485iXcUj+Ghk+1OPlw==
+config:
+  aws:region: ap-southeast-2
+  fredt:dnsZone: nzgeospatial.dev
+  fredt:secretParameterNames:
+    - CESIUM_ACCESS_TOKEN
+    - NIWA_API_KEY
+    - LINZ_API_KEY
+    - STATSNZ_API_KEY
+    - MFE_API_KEY
+    - POSTGRES_PASSWORD
+    - GEOSERVER_ADMIN_PASSWORD
+  fredt:basicAuthUser:
+    secure: v1:tcbLfKVXOBm2YqXK:+XJgzQYDni5752jhRZPWg1mRLd64
+  fredt:basicAuthPassword:
+    secure: v1:MpbS5pthsIfqsJTQ:YnL1jj9JWQxwxS4lGKkH7TsGFbguPMuxYNeka2gLM0WIJATWqMQ=
+  fredt:databasePassword:
+    secure: v1:n5pc0OZqivgbdYNa:Cx5mzXkSS3HXwpzT8GSfNk0apvwOXD6xYwQK8/JY0ckJg/04pQw=
