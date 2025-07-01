@@ -139,7 +139,7 @@ class CloudFront:
 
     def _basic_auth(self, basic_auth):
         lambda_role = aws.iam.Role(
-            "cloudfront-basic-auth",
+            "cloudfront-basic-auth-role",
             assume_role_policy=json.dumps(
                 {
                     "Version": "2012-10-17",
@@ -210,20 +210,14 @@ class CloudFront:
             {".": pulumi.FileArchive("./lambdas/http_basic_auth_deploy/")}
         )
 
-        aws.lambda_.Function(
+        function = aws.lambda_.Function(
             "cloudfront-basic-auth",
-            name="cloudfront-basic-auth",
             runtime="nodejs18.x",
             handler="http_basic_auth.handler",
             code=archive,
             role=lambda_role.arn,
             opts=pulumi.ResourceOptions(provider=self.provider),
             publish=True,
-        )
-
-        function = aws.lambda_.get_function_output(
-            function_name="cloudfront-basic-auth",
-            opts=pulumi.InvokeOptions(provider=self.provider),
         )
 
         return function
