@@ -36,8 +36,8 @@ backend_domain = f"api.{app_subdomain}"
 geoserver_domain = f"gs.{app_subdomain}"
 domains = [
     app_subdomain,
-    # backend_domain,
-    # geoserver_domain,
+    backend_domain,
+    geoserver_domain,
 ]
 aws_region = "ap-southeast-2"
 
@@ -79,22 +79,22 @@ vpc = awsx.ec2.Vpc(
 
 
 # # Create a Postgres Instance
-# postgres = PostgresInstance(
-#     f"{prefix}-pg",
-#     vpc=vpc,
-#     database_name=prefix,
-#     username=prefix,
-#     password=config.get_secret("databasePassword"),
-#     cidr_blocks=[
-#         network_cidr_block,
-#     ],
-# )
+postgres = PostgresInstance(
+    f"{prefix}-pg",
+    vpc=vpc,
+    database_name=prefix,
+    username=prefix,
+    password=config.require_secret("databasePassword"),
+    cidr_blocks=[
+        network_cidr_block,
+    ],
+)
 
 # # Set up shared filesystems.
-# shared_vol = EFSVolume(
-#     f"{prefix}-shared-data",
-#     vpc=vpc,
-# )
+shared_vol = EFSVolume(
+    f"{prefix}-shared-data",
+    vpc=vpc,
+)
 
 
 # Create the ECS Cluster
@@ -111,122 +111,121 @@ terria = FargateApplication(
     vpc,
     service_port=3001,
     image_tag="2025.06.04",
-    # environment=[
-    #     {"name": "BACKEND_HOST", "value": f"https://{backend_domain}"}
-    # ],
-    # secrets=[
-    #     {
-    #         "name": "CESIUM_ACCESS_TOKEN",
-    #         "valueFrom": secret_parameters["CESIUM_ACCESS_TOKEN"].arn,
-    #     }
-    # ],
+    environment=[
+        {"name": "BACKEND_HOST", "value": f"https://{backend_domain}"}
+    ],
+    secrets=[
+        {
+            "name": "CESIUM_ACCESS_TOKEN",
+            "valueFrom": secret_parameters["CESIUM_ACCESS_TOKEN"].arn,
+        }
+    ],
 )
 
 # # Setup GeoServer
-# geoserver_ap = shared_vol.create_access_point("geoserver", "/stored_data/geoserver")
-# geoserver_env = {
-#     "SKIP_DEMO_DATA": "true",
-#     "CORS_ENABLED": "true",
-#     "ROOT_WEBAPP_REDIRECT": "true",
-#     "GEOSERVER_DATA_DIR": "/opt/geoserver_data",
-# }
-# geoserver = FargateApplication(
-#     f"{prefix}-geoserver",
-#     cluster,
-#     vpc,
-#     service_port=8080,
-#     image_tag="2.22.5",
-#     cpu=2048,
-#     memory=4096,
-#     replica_count=1,
-#     environment=[{"name": key, "value": value} for key, value in geoserver_env.items()],
-#     volumes=[
-#         aws.ecs.TaskDefinitionVolumeArgs(
-#             name="shared-vol",
-#             efs_volume_configuration=aws.ecs.TaskDefinitionVolumeEfsVolumeConfigurationArgs(
-#                 file_system_id=shared_vol.file_system.id,
-#                 transit_encryption="ENABLED",
-#                 authorization_config={
-#                     "access_point_id": geoserver_ap.id,
-#                     "iam": "ENABLED",
-#                 },
-#             ),
-#         ),
-#     ],
-#     mount_points=[
-#         awsx.ecs.TaskDefinitionMountPointArgs(
-#             container_path="/opt/geoserver_data",
-#             source_volume="shared-vol",
-#         )
-#     ],
-# )
+geoserver_ap = shared_vol.create_access_point("geoserver", "/stored_data/geoserver")
+geoserver_env = {
+    "SKIP_DEMO_DATA": "true",
+    "CORS_ENABLED": "true",
+    "ROOT_WEBAPP_REDIRECT": "true",
+    "GEOSERVER_DATA_DIR": "/opt/geoserver_data",
+}
+geoserver = FargateApplication(
+    f"{prefix}-geoserver",
+    cluster,
+    vpc,
+    service_port=8080,
+    image_tag="2025.06.04",
+    cpu=2048,
+    memory=4096,
+    replica_count=1,
+    environment=[{"name": key, "value": value} for key, value in geoserver_env.items()],
+    volumes=[
+        aws.ecs.TaskDefinitionVolumeArgs(
+            name="shared-vol",
+            efs_volume_configuration=aws.ecs.TaskDefinitionVolumeEfsVolumeConfigurationArgs(
+                file_system_id=shared_vol.file_system.id,
+                transit_encryption="ENABLED",
+                authorization_config={
+                    "access_point_id": geoserver_ap.id,
+                    "iam": "ENABLED",
+                },
+            ),
+        ),
+    ],
+    mount_points=[
+        awsx.ecs.TaskDefinitionMountPointArgs(
+            container_path="/opt/geoserver_data",
+            source_volume="shared-vol",
+        )
+    ],
+)
 
 # # Setup Backend (Flask Server + Celery Workers)
-# environment = [
-#     ("DATA_DIR", "/shared_storage"),
-#     ("DATA_DIR_GEOSERVER", "/shared_storage/geoserver"),
-#     ("DATA_DIR_MODEL_OUTPUT", "/shared_storage/model_output"),
-#     ("ROOF_SURFACE_DATASET_PATH", "/stored_data/roof_surfaces.gdb"),
-#     ("ROAD_DATASET_PATH", "/datasets/roads.gpkg"),
-#     ("FLOOD_MODEL_DIR", "/bg_flood"),
-#     ("POSTGRES_HOST", postgres.address),
-#     ("POSTGRES_USER", prefix),
-#     ("POSTGRES_DB", prefix),
-#     ("POSTGRES_PORT", "5432"),
-#     ("LIDAR_DIR", "lidar"),
-#     ("DEM_DIR", "hydro_dem"),
-#     ("INSTRUCTIONS_FILE", "./instructions.json"),
-#     ("GEOSERVER_HOST", f"https://{geoserver_domain}"),
-#     ("GEOSERVER_PORT", "443"),
-#     ("GEOSERVER_ADMIN_NAME", "admin"),
-# ]
-# backend_ap = shared_vol.create_access_point("backend", "/")
-# backend = DigitalTwinBackend(
-#     service_name=f"{prefix}-backend",
-#     vpc=vpc,
-#     cluster=cluster,
-#     image_tag="2024.11.27",
-#     secrets=[
-#         {"name": key, "valueFrom": value.arn}
-#         for key, value in secret_parameters.items()
-#     ],
-#     volumes=[
-#         aws.ecs.TaskDefinitionVolumeArgs(
-#             name="shared-vol",
-#             efs_volume_configuration=aws.ecs.TaskDefinitionVolumeEfsVolumeConfigurationArgs(
-#                 file_system_id=shared_vol.file_system.id,
-#                 transit_encryption="ENABLED",
-#                 authorization_config={
-#                     "access_point_id": backend_ap.id,
-#                     "iam": "ENABLED",
-#                 },
-#             ),
-#         ),
-#     ],
-#     mount_points=[
-#         awsx.ecs.TaskDefinitionMountPointArgs(
-#             container_path="/shared_storage",
-#             source_volume="shared-vol",
-#         )
-#     ],
-#     environment=[{"name": key, "value": value} for key, value in environment],
-# )
+environment = [
+    ("DATA_DIR", "/shared_storage"),
+    ("DATA_DIR_GEOSERVER", "/shared_storage/geoserver"),
+    ("DATA_DIR_MODEL_OUTPUT", "/shared_storage/model_output"),
+    ("ROOF_SURFACE_DATASET_PATH", "/stored_data/roof_surfaces.gdb"),
+    ("ROAD_DATASET_PATH", "/datasets/roads.gpkg"),
+    ("FLOOD_MODEL_DIR", "/bg_flood"),
+    ("POSTGRES_HOST", postgres.address),
+    ("POSTGRES_USER", prefix),
+    ("POSTGRES_DB", prefix),
+    ("POSTGRES_PORT", "5432"),
+    ("LIDAR_DIR", "lidar"),
+    ("DEM_DIR", "hydro_dem"),
+    ("INSTRUCTIONS_FILE", "./instructions.json"),
+    ("GEOSERVER_HOST", f"https://{geoserver_domain}"),
+    ("GEOSERVER_PORT", "443"),
+    ("GEOSERVER_ADMIN_NAME", "admin"),
+]
+backend_ap = shared_vol.create_access_point("backend", "/")
+backend = DigitalTwinBackend(
+    service_name=f"{prefix}-backend",
+    vpc=vpc,
+    cluster=cluster,
+    image_tag="2025.06.04",
+    secrets=[
+        {"name": key, "valueFrom": value.arn}
+        for key, value in secret_parameters.items()
+    ],
+    volumes=[
+        aws.ecs.TaskDefinitionVolumeArgs(
+            name="shared-vol",
+            efs_volume_configuration=aws.ecs.TaskDefinitionVolumeEfsVolumeConfigurationArgs(
+                file_system_id=shared_vol.file_system.id,
+                transit_encryption="ENABLED",
+                authorization_config={
+                    "access_point_id": backend_ap.id,
+                    "iam": "ENABLED",
+                },
+            ),
+        ),
+    ],
+    mount_points=[
+        awsx.ecs.TaskDefinitionMountPointArgs(
+            container_path="/shared_storage",
+            source_volume="shared-vol",
+        )
+    ],
+    environment=[{"name": key, "value": value} for key, value in environment],
+)
 
 
 lb = ApplicationLoadBalancer(
     lb_name=f"{prefix}-alb",
     vpc=vpc,
     default_target_group=terria.target_group,
-    targets=[],
-    # targets=[
-    #     LoadBalancerTarget(
-    #         "backend", f"{backend_domain}", backend.target_group
-    #     ),
-    #     LoadBalancerTarget(
-    #         "geoserver", f"{geoserver_domain}", geoserver.target_group
-    #     ),
-    # ],
-    certificate=certs["ap-southeast-2"],
+    targets=[
+        LoadBalancerTarget(
+            "backend", f"{backend_domain}", backend.target_group
+        ),
+        LoadBalancerTarget(
+            "geoserver", f"{geoserver_domain}", geoserver.target_group
+        ),
+    ],
+    certificate=certs[aws_region],
 )
 
 
@@ -243,6 +242,6 @@ cloudfront = CloudFront(
     ),
 )
 
-# pulumi.export("backend-ecr-url", backend.repo.repository_url)
+pulumi.export("backend-ecr-url", backend.repo.repository_url)
 pulumi.export("terria-ecr-url", terria.repo.repository_url)
-# pulumi.export("geoserver-ecr-url", geoserver.repo.repository_url)
+pulumi.export("geoserver-ecr-url", geoserver.repo.repository_url)

@@ -86,21 +86,21 @@ class DigitalTwinBackend:
             **shared_fargate_args,
         )
 
-        celery_service_name = f"{service_name}-celery"
-        celery_service = FargateApplication(
-            celery_service_name,
-            cluster,
-            vpc,
-            cpu=1000,
-            memory=4096,
-            replica_count=2,
-            entrypoint=["/app/src/celery_worker_entrypoint.sh"],
-            **shared_fargate_args,
-        )
+        # celery_service_name = f"{service_name}-celery"
+        # celery_service = FargateApplication(
+        #     celery_service_name,
+        #     cluster,
+        #     vpc,
+        #     cpu=1000,
+        #     memory=4096,
+        #     replica_count=2,
+        #     entrypoint=["/app/src/celery_worker_entrypoint.sh"],
+        #     **shared_fargate_args,
+        # )
 
         self.target_group = backend_service.target_group
         self.backend_service = backend_service
-        self.celery_service = celery_service
+        # self.celery_service = celery_service
         self.repo = repo
 
     def _setup_cache(self, service_name: str, cache_node_type: str, vpc: awsx.ec2.Vpc):

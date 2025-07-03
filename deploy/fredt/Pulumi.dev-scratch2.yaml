@@ -15,4 +15,4 @@ config:
   fredt:basicAuthPassword:
     secure: v1:MpbS5pthsIfqsJTQ:YnL1jj9JWQxwxS4lGKkH7TsGFbguPMuxYNeka2gLM0WIJATWqMQ=
   fredt:databasePassword:
-    secure: v1:n5pc0OZqivgbdYNa:Cx5mzXkSS3HXwpzT8GSfNk0apvwOXD6xYwQK8/JY0ckJg/04pQw=
+    secure: v1:dluaqImM59qI7r0Q:EcqHbVClYKz+vf/ylECQtZIrhow/2/x7cALy4Qa5CTUpIjA=
