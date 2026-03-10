@@ -29,35 +29,35 @@ from floodresilience.dynamic_boundary_conditions.tide import main_tide_slr
 from floodresilience.flood_model import bg_flood_model, process_hydro_dem
 
 DEFAULT_MODULES_TO_PARAMETERS = {
-    retrieve_from_instructions: {
-        "log_level": LogLevel.INFO,
-        "instruction_json_path": pathlib.Path("floodresilience/static_boundary_instructions.json").as_posix()
-    },
-    process_hydro_dem: {
-        "log_level": LogLevel.INFO
-    },
-    main_rainfall: {
-        "rcp": 2.6,
-        "time_period": "2031-2050",
-        "ari": 100,
-        "storm_length_mins": 2880,
-        "time_to_peak_mins": 1440,
-        "increment_mins": 10,
-        "hyeto_method": HyetoMethod.ALT_BLOCK,
-        "input_type": RainInputType.UNIFORM,
-        "log_level": LogLevel.INFO
-    },
-    main_tide_slr: {
-        "tide_length_mins": 2880,
-        "time_to_peak_mins": 1440,
-        "interval_mins": 10,
-        "proj_year": 2030,
-        "confidence_level": "low",
-        "ssp_scenario": "SSP1-2.6",
-        "add_vlm": False,
-        "percentile": 50,
-        "log_level": LogLevel.INFO
-    },
+    # retrieve_from_instructions: {
+    #     "log_level": LogLevel.INFO,
+    #     "instruction_json_path": pathlib.Path("floodresilience/static_boundary_instructions.json").as_posix()
+    # },
+    # process_hydro_dem: {
+    #     "log_level": LogLevel.INFO
+    # },
+    # main_rainfall: {
+    #     "rcp": 2.6,
+    #     "time_period": "2031-2050",
+    #     "ari": 100,
+    #     "storm_length_mins": 2880,
+    #     "time_to_peak_mins": 1440,
+    #     "increment_mins": 10,
+    #     "hyeto_method": HyetoMethod.ALT_BLOCK,
+    #     "input_type": RainInputType.UNIFORM,
+    #     "log_level": LogLevel.INFO
+    # },
+    # main_tide_slr: {
+    #     "tide_length_mins": 2880,
+    #     "time_to_peak_mins": 1440,
+    #     "interval_mins": 10,
+    #     "proj_year": 2030,
+    #     "confidence_level": "low",
+    #     "ssp_scenario": "SSP1-2.6",
+    #     "add_vlm": False,
+    #     "percentile": 50,
+    #     "log_level": LogLevel.INFO
+    # },
     main_river: {
         "flow_length_mins": 2880,
         "time_to_peak_mins": 1440,
