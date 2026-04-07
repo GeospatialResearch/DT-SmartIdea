@@ -1,3 +1,6 @@
+# ARCHIVE NOTICE
+This repository has been archived in favour of https://github.com/GeospatialResearch/FReDT-Smart-Ideas
+
 Copyright © 2021-2025 Geospatial Research Institute Toi Hangarau
 # Flood Resilience Digital Twin (FReDT)
 ![image](paper/Capture2024.PNG)
